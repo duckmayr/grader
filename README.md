@@ -110,3 +110,25 @@ plot(density(curved_grades, from = 0, to = 100), xlim = c(50, 100))
 ```
 
 <img src="man/figures/README-example-normal-curve-1.png" width="100%" />
+
+You can also generate an average of scores after dropping a particular
+number of assignments; suppose a student had assignment scores
+$(0, 95, 0)$; we can see what the student’s average after dropping no
+assignments, one, two, or even one and a half assignments (in the case
+of fractional dropped assignments, a weighted average is used where the
+marginal score receives the fractional weight):
+
+``` r
+grades = c(0, 95, 0)
+knitr::kable(data.frame(
+    Dropped = c(0, 1, 1.5, 2),
+    Average = sapply(c(0, 1, 1.5, 2), function(x) avg_w_drops(grades, x))
+))
+```
+
+| Dropped |  Average |
+|--------:|---------:|
+|     0.0 | 31.66667 |
+|     1.0 | 47.50000 |
+|     1.5 | 63.33333 |
+|     2.0 | 95.00000 |

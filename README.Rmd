@@ -93,3 +93,18 @@ knitr::kable(data.frame(
 ), row.names = FALSE)
 plot(density(curved_grades, from = 0, to = 100), xlim = c(50, 100))
 ```
+
+You can also generate an average of scores after dropping a particular number
+of assignments; suppose a student had assignment scores $(0, 95, 0)$; we can
+see what the student's average after dropping no assignments, one, two, or
+even one and a half assignments (in the case of fractional dropped assignments,
+a weighted average is used where the marginal score receives the fractional
+weight):
+
+```{r assignment-dropping}
+grades = c(0, 95, 0)
+knitr::kable(data.frame(
+    Dropped = c(0, 1, 1.5, 2),
+    Average = sapply(c(0, 1, 1.5, 2), function(x) avg_w_drops(grades, x))
+))
+```
