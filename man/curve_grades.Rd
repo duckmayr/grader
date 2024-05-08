@@ -12,12 +12,12 @@ curve_grades(
   y0 = 85,
   y1 = 95,
   target_mean = 85,
-  target_sd = 5
+  target_sd = 10
 )
 }
 \arguments{
 \item{scores}{A numeric vector giving the raw scores; values should be in
-\eqn{[0, 1]}}
+\eqn{[0, 1]} or \eqn{[0, 100]}}
 
 \item{method}{A character vector, one of "linear" or "normal" (see details);
 default: "linear"}
@@ -29,10 +29,10 @@ defaults are \code{mean(scores)} and \code{quantile(scores, probs = 0.95)}}
 defaults are 85 and 95}
 
 \item{target_mean}{If \code{method == "normal"}, the mean of the resulting
-normal distribution; default: 85}
+truncated normal distribution; default: 85}
 
 \item{target_sd}{If \code{method == "normal"}, the standard deviation of the
-resulting normal distribution; default: 5}
+resulting truncated normal distribution; default: 10}
 }
 \value{
 A numeric vector giving the curved scores

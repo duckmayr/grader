@@ -32,3 +32,64 @@ You can install the development version of grader from [GitHub](https://github.c
 # install.packages("devtools")
 devtools::install_github("duckmayr/grader")
 ```
+
+## Example
+
+Suppose you had the following set of grades:
+
+```{r example-grades}
+set.seed(138)
+grades = round(runif(n = 100, min = 0, max = 100))
+knitr::kable(data.frame(
+    "Low Score" = min(grades),
+    "First Quartile" = quantile(grades, probs = 0.25),
+    "Mean" = mean(grades), "Median" = median(grades),
+    "Third Quartile" = quantile(grades, probs = 0.75),
+    "High Score" = max(grades),
+    check.names = FALSE
+), row.names = FALSE)
+plot(density(grades, from = 0, to = 100))
+```
+
+But you wanted a more reasonable distribution of the grades...
+You can use `grader::curve_grades()`.
+It provides two types of curve:
+
+1. A linear curve, matching two raw scores to two target scores and linearly
+   adjusting the remaining grades; this is the default behavior, with defaults
+   matching the mean raw score to 85 and the 95th percentile score to 95.
+2. A "normal" curve, matching the empirical CDF of scores to a normal CDF
+   with a specified target mean (default: 85) and specified target standard
+   deviation (default: 10) truncated to $[0, 100]$.
+
+Here's an illustration of the default curving behavior (note the x-axis!):
+
+```{r example-linear-curve}
+library(grader)
+curved_grades = round(curve_grades(scores = grades))
+knitr::kable(data.frame(
+    "Low Score" = min(curved_grades),
+    "First Quartile" = quantile(curved_grades, probs = 0.25),
+    "Mean" = mean(curved_grades), "Median" = median(curved_grades),
+    "Third Quartile" = quantile(curved_grades, probs = 0.75),
+    "High Score" = max(curved_grades),
+    check.names = FALSE
+), row.names = FALSE)
+plot(density(curved_grades, from = 0, to = 100), xlim = c(50, 100))
+```
+
+Or the normal curve behavior:
+
+```{r example-normal-curve}
+library(grader)
+curved_grades = round(curve_grades(scores = grades, method = "normal"))
+knitr::kable(data.frame(
+    "Low Score" = min(curved_grades),
+    "First Quartile" = quantile(curved_grades, probs = 0.25),
+    "Mean" = mean(curved_grades), "Median" = median(curved_grades),
+    "Third Quartile" = quantile(curved_grades, probs = 0.75),
+    "High Score" = max(curved_grades),
+    check.names = FALSE
+), row.names = FALSE)
+plot(density(curved_grades, from = 0, to = 100), xlim = c(50, 100))
+```

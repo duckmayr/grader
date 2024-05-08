@@ -1,3 +1,6 @@
+## Helper function to check if a number is in an interval
+in_interval = function(x, low, high) x > low & x < high
+
 #' Curve grades
 #'
 #' Both a linear curving tool and a normal curving tool are provided
@@ -15,7 +18,7 @@
 #'    `target_mean` and `target_sd` truncated to \eqn{[0, 100]}.
 #'
 #' @param scores A numeric vector giving the raw scores; values should be in
-#'     \eqn{[0, 1]}
+#'     \eqn{[0, 1]} or \eqn{[0, 100]}
 #' @param method A character vector, one of "linear" or "normal" (see details);
 #'     default: "linear"
 #' @param x0,x1 If `method == "linear"`, two raw scores to serve as anchors;
@@ -23,9 +26,9 @@
 #' @param y0,y1 If `method == "linear"`, what `x0` and `x1` should map onto;
 #'     defaults are 85 and 95
 #' @param target_mean If `method == "normal"`, the mean of the resulting
-#'     normal distribution; default: 85
+#'     truncated normal distribution; default: 85
 #' @param target_sd If `method == "normal"`, the standard deviation of the
-#'     resulting normal distribution; default: 5
+#'     resulting truncated normal distribution; default: 10
 #'
 #' @return A numeric vector giving the curved scores
 #'
@@ -33,27 +36,22 @@
 curve_grades = function(
     scores, method = "linear",
     x0 = mean(scores), x1 = quantile(scores, probs = 0.95), y0 = 85, y1 = 95,
-    target_mean = 85, target_sd = 5
+    target_mean = 85, target_sd = 10
 ) {
-    if ( any(scores > 1) | any(scores < 0) ) {
-        stop("scores should be between 0 and 1")
+    if ( all(in_interval(scores, 0, 100)) ) {
+        if ( all(in_interval(scores, 0, 1)) ) {
+            scores = 100 * scores
+        }
+    } else {
+        stop("scores should be between 0 and 1 or between 0 and 100")
     }
     if ( method == "linear" ) {
         scores = y0 + ((y1-y0) / (x1-x0)) * (scores - x0)
     } else if ( method == "normal" ) {
-        ## Use Taylor expansion approx to get params of truncated normal
-        x = target_mean / target_sd
-        z = dnorm(x) / pnorm(x)
-        A = z * (1 + x^2 + z * x)
-        B = z * (x + z)
-        C = A * target_mean
-        D = B * target_mean^2 - (1 - B) * target_sd^2
-        s = sqrt((2*B*D + C^2 - 2*D + C*sqrt(C^2 - 4*D*(1-B))) / (2*(1-B)^2))
-        m = (target_mean - A*s) / (1 - B)
-        ## Use empirical quantiles to get theoretical quantiles
         p = rank(scores, ties.method = "max") / (length(scores) + 1)
-        a = pnorm(0, m, s); b = pnorm(100, m, s)
-        scores = qnorm(a + p * (b - a), m, s)
+        a = pnorm(  0, mean = target_mean, sd = target_sd)
+        b = pnorm(100, mean = target_mean, sd = target_sd)
+        scores = qnorm(a + p * (b - a), mean = target_mean, sd = target_sd)
     } else {
         stop("method should be one of 'linear' or 'normal'")
     }
